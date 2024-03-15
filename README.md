@@ -1,0 +1,1 @@
+Developed Flask-based app with PyTesseract for text extraction from images, PyMuPDF for PDF text extraction and Google Translate API for translation. Features include file handling and gTTS for audio.
