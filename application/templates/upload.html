@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class=" mt-4" style="text-align: center;">
+    <h4>Image/PDF File To Get Translation</h4>
+</div>
+{{ dropzone.create(action='upload') }}
+{{ dropzone.load_js() }}
+{{ dropzone.config() }}
+{% endblock %}
