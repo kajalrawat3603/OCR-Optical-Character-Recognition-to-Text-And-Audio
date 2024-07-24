@@ -11,7 +11,11 @@ from .form import QRCodeData
 from gtts import gTTS
 from flask import send_file
 from PIL import Image
+from dotenv import load_dotenv
 
+load_dotenv()
+secret_key = os.getenv('SECRET_KEY')
+app.secret_key = secret_key
 
 @app.route("/")
 def index():
