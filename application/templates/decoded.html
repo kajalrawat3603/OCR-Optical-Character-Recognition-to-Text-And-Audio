@@ -1,100 +1,153 @@
-{% extends 'layout.html' %}
-{% block content %}
-<div class="mt-4">
-    <div class="card card-style mb-2">
-        <div class="card-body justify-content-center">
-            <form action="" method="POST">
-                {{ form.csrf_token() }}
-                <fieldset class="form-group">
-                    <legend class="mb-4">Generated Text And Audio</legend>
-                    <div class="form-group">
-                        {{ form.data_field.label(class="form-control-label") }}
-                        {% if form.data_field.errors %}
-                            {{ form.data_field(class="form-control form-control-sm is-invalid") }}
-                        {% for error in form.data_field.errors %}
-                        <div class="invalid-feedback">
-                            <span>{{error}}</span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if title %}
+    <title>OCR-{{ title }}</title>
+    {% else %}
+    <title>OCR</title>
+    {% endif %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+80s+Fade&family=Rubik+Doodle+Triangles&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    {{ dropzone.load_css() }}
+    {{ dropzone.style('border: 2px dashed #0087F7; margin: 2% 10% 2% 10% ; min-height: 400px;') }}
+</head>
+<body>
+    {% extends 'layout.html' %}
+    {% block content %}
+    <div class="mt-4">
+        <div class="card card-style mb-2">
+            <div class="card-body justify-content-center">
+                <form id="your-form-id" action="" method="POST">
+                    {{ form.csrf_token() }}
+                    <fieldset class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <legend class="mb-4">Generated Text And Audio</legend>
+                            <div class="d-flex ">
+                                <button type="button" id="refresh-btn" class="btn btn-outline-secondary ml-2"><i class="fa-solid fa-refresh" style="color: black;"></i>
+                                </button>
+                                <a href="/" class="btn btn-outline-secondary ml-2" style="text-decoration: none; color: black;">
+                                    <i class="fa-solid fa-xmark"></i> 
+                                </a>
+                            </div>
                         </div>
-                        {% endfor %}
-                        {% else %}
-                            {{ form.data_field(class="form-control form-control-sm") }}
-                        {% endif %}
-                    </div>
-                    <p>Language is: {{ form.language }}</p>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="inputGroupSelect01">Language To Translate To</label>
+                        <div class="form-group">
+                            {{ form.data_field.label(class="form-control-label") }}
+                            {% if form.data_field.errors %}
+                                {{ form.data_field(class="form-control form-control-sm is-invalid", id="data_field") }}
+                                {% for error in form.data_field.errors %}
+                                    <div class="invalid-feedback">
+                                        <span>{{ error }}</span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {{ form.data_field(class="form-control form-control-sm", id="data_field") }}
+                            {% endif %}
+                            <button type="button" id="start-record-btn" class="btn btn-primary mt-2" style="background-color: white; color: black;">
+                                <i class="fa-solid fa-microphone" style="color: #e10e74;"></i> Start Recording
+                            </button>
+                            <button type="button" id="stop-record-btn" class="btn btn-secondary mt-2" style="display: none;">
+                                <i class="fa-solid fa-stop" style="color: #e10e74;"></i> Stop Recording
+                            </button>
                         </div>
+                        <p>Language is: {{ form.language }}</p>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="inputGroupSelect01">Language To Translate To</label>
+                            </div>
                             {{ form.language_field(class="custom-select") }}
-                    </div>
-                    <div class="form-group">
-                        {{ form.translated_field.label(class="form-control-label") }}
-                        {{ form.translated_field(class="form-control form-control-sm") }}
-                    </div>
-                    <div class="form-group border-bottom pb-3 mt-4">
-                        {{ form.submit(class="btn btn-outline-info" )}}
-                    </div>
-                </fieldset>
-            </form>
+                        </div>
+                        <div class="form-group">
+                            {{ form.translated_field.label(class="form-control-label") }}
+                            {{ form.translated_field(class="form-control form-control-sm") }}
+                        </div>
+                        <div class="form-group border-bottom pb-3 mt-4">
+                            {{ form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-{% if audio %}
-<p>Translated Audio Available for Download:</p>
-    <div class="d-flex justify-content-center mt-4">
-        <audio controls autoplay class="m-auto">
-            <source src="horse.ogg" type="audio/ogg">
-            <source src="{{ url_for('static', filename='audio_files/'+ audio) }}" type="audio/mpeg">
-            Your browser does not support the audio.
-        </audio>
-    </div>
-{% endif %}
+    {% if audio %}
+        <p>Translated Audio Available for Download:</p>
+        <div class="d-flex justify-content-center mt-4">
+            <audio controls autoplay class="m-auto">
+                <source src="horse.ogg" type="audio/ogg">
+                <source src="{{ url_for('static', filename='audio_files/' + audio) }}" type="audio/mpeg">
+                Your browser does not support the audio.
+            </audio>
+        </div>
+    {% endif %}
 
-{% if translated_txt_filename %}
-    <p>Translated Text Available for Download:</p>
-    <a href="{{ url_for('download_file', translated_txt_filename=translated_txt_filename) }}" download >
-        Download Translated Text (.txt)
-    </a>
-{% endif %}
+    {% if translated_txt_filename %}
+        <p>Translated Text Available for Download:</p>
+        <a href="{{ url_for('download_file', translated_txt_filename=translated_txt_filename) }}" download>
+            Download Translated Text (.txt)
+        </a>
+    {% endif %}
 
-<script>
-    document.getElementById("submit").addEventListener("click", function () {
-        var dataFieldValue = document.querySelector('#data_field').value.trim();
-        var selectedLanguage = document.getElementById('language').value;
-        // Checking if data_field is empty
-        if (dataFieldValue === '') {
-            // Show an alert indicating that the field is empty
-            event.preventDefault();
+    <script>
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        // Force reload the page to reset everything
+        location.href = location.href; 
+    });
+
+    let recognition;
+    const startBtn = document.getElementById("start-record-btn");
+    const stopBtn = document.getElementById("stop-record-btn");
+    const dataField = document.getElementById("data_field");
+
+    startBtn.addEventListener("click", function () {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.start();
+
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+
+        recognition.onresult = function (event) {
+            let transcript = '';
+            for (let i = 0; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            dataField.value = transcript;
+        };
+
+        recognition.onspeechend = function () {
+            recognition.stop();
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+        };
+
+        recognition.onerror = function (event) {
+            console.error('Speech recognition error detected: ' + event.error);
             swal({
-                title: "Error!",
-                text: "Please enter text in the field.",
-                icon: "error",
-                button: "OK",
-            });
-        } else if ( selectedLanguage === 'Unkown' || selectedLanguage === '') {
-            event.preventDefault();
-            swal({
-                title: 'Language Not Available',
-                text: 'The selected language is not available in your system.',
+                title: 'Error',
+                text: 'Speech recognition error: ' + event.error,
                 icon: 'error',
                 button: "OK"
             });
-        }
-        else {
-            swal({
-                title: "File upload in process",
-                text: "Please wait... this can take some time",
-                icon: "success",
-                button: "OK",
-            });
-            // document.querySelector('form').submit();
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+        };
+    });
+
+    stopBtn.addEventListener("click", function () {
+        if (recognition) {
+            recognition.stop();
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
         }
     });
-</script>
+    </script>
 
-
-{% endblock %}
-
-
-
+    {% endblock %}
+</body>
+</html>
