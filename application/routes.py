@@ -13,6 +13,7 @@ from flask import send_file
 from PIL import Image
 from dotenv import load_dotenv
 
+
 load_dotenv()
 secret_key = os.getenv('SECRET_KEY')
 app.secret_key = secret_key
@@ -21,11 +22,11 @@ app.secret_key = secret_key
 def index():
     return render_template("index.html", title="Home Page")
 
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'}
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Update your upload route
 @app.route("/upload", methods=["POST", "GET"])
 def upload():
     if request.method == "POST":
@@ -41,17 +42,31 @@ def upload():
             # Extract text from different file formats
             if file_extension == 'pdf':
                 text = extract_text_from_pdf(file_location)
-            else:
+            elif file_extension in ['png', 'jpg', 'jpeg']:
                 text = extract_text_from_image(file_location)
+            elif file_extension == 'docx':
+                text = extract_text_from_docx(file_location)
+            else:
+                text = "Unsupported file format."
 
             session["sentence"] = text
             os.remove(file_location)
             return redirect("/decoded/")
         else:
-            return "Invalid file format. Please upload a valid PDF or image file."
+            return "Invalid file format. Please upload a valid file."
 
     else:
         return render_template("upload.html", title='Upload')
+
+from docx import Document
+
+def extract_text_from_docx(docx_file):
+    text = ""
+    doc = Document(docx_file)
+    for para in doc.paragraphs:
+        text += para.text + "\n"
+    return text
+
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_file):
